@@ -236,7 +236,6 @@ function normalizeProduct(p) {
     category: p.category || p.categoria || p.rubro || '',
     color:    p.color || p.colour  || '',
     price:    Number(p.price || p.precio || 0),
-    image:    p.image || p.imagen  || p.image_data || null,
     sizes,
   }
 }
@@ -399,10 +398,9 @@ function renderList() {
     const hdr = document.createElement('div')
     hdr.className = 'product-header'
 
-    const thumb = document.createElement(p.image ? 'img' : 'div')
-    thumb.className = 'product-thumb' + (p.image ? '' : ' no-img')
-    if (p.image) { thumb.src = p.image; thumb.alt = p.name }
-    else thumb.textContent = '📦'
+    const thumb = document.createElement('div')
+    thumb.className = 'product-thumb no-img'
+    thumb.textContent = '📦'
 
     const sub = [p.brand, p.color].filter(Boolean).join(' · ')
     const info = document.createElement('div')
