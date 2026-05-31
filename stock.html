@@ -124,6 +124,9 @@
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZfzVmml8GljdWS4Pw7MuHiXJF9nJgLw0ipXfXqf6u1_kzQMGCvvaLgYCNB8xp848n/exec'
 const LS_PIN_KEY = 'delpa_stock_pin_session'
+const LS_FILE_ID_KEY = 'delpa_stock_file_id'
+// File ID por defecto — se actualiza automáticamente cuando DELPA sube el stock
+const DEFAULT_FILE_ID = '1V0czSGrD_kGTqKLIcrO40XihljxzDQU-'
 
 let allProducts = []
 let activeCat = ''
@@ -172,9 +175,10 @@ function jsonpRequest() {
       clearTimeout(timer); delete window[cb]; script.remove()
       reject(new Error('Error de red al cargar el script'))
     }
-    script.src = SCRIPT_URL + '?action=getStock&callback=' + cb + '&_t=' + Date.now()
+    const fileId = localStorage.getItem(LS_FILE_ID_KEY) || DEFAULT_FILE_ID
+    script.src = SCRIPT_URL + '?action=getStock&fileId=' + encodeURIComponent(fileId) + '&callback=' + cb + '&_t=' + Date.now()
     document.head.appendChild(script)
-    dbg('JSONP request: ' + script.src)
+    dbg('JSONP request fileId=' + fileId)
   })
 }
 
@@ -182,6 +186,12 @@ function jsonpRequest() {
 // El Apps Script puede devolver distintas estructuras; esta función las unifica.
 function normalizeStockData(raw) {
   if (!raw) return { products: [], updatedAt: null, pin: '' }
+
+  // Error del Apps Script (ej: permiso denegado)
+  if (raw.error) {
+    dbg('ERROR del Apps Script: ' + raw.error)
+    throw new Error('Apps Script: ' + String(raw.error).slice(0, 120))
+  }
 
   // Ya tiene el formato correcto
   if (Array.isArray(raw.products)) {
