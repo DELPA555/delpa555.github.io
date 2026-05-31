@@ -26,7 +26,6 @@
   #app-screen{display:none;flex-direction:column;min-height:100dvh}
   .app-header{padding:16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
   .app-header h2{font-size:16px;font-weight:700}
-  .app-header small{font-size:11px;color:var(--muted);display:block;margin-top:2px}
   .search-bar{padding:12px 16px;background:var(--bg)}
   .search-bar input{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:15px;padding:10px 14px;border-radius:12px;outline:none}
   .search-bar input:focus{border-color:var(--accent)}
@@ -45,7 +44,7 @@
   .product-price{font-size:16px;font-weight:700;color:var(--accent);text-align:right;white-space:nowrap}
   .sizes-row{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
   .size-badge{font-size:12px;font-weight:600;padding:4px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text)}
-  .size-badge.low{border-color:#92400e;color:#fbbf24;background:#451a03/30}
+  .size-badge.low{border-color:#92400e;color:#fbbf24}
   .size-badge.out{border-color:#333;color:var(--muted);text-decoration:line-through;opacity:.5}
   .size-stock{font-size:10px;color:var(--muted);margin-left:2px;font-weight:400}
   #empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
@@ -56,6 +55,8 @@
   .logout-btn:hover{color:var(--danger)}
   .header-row{display:flex;align-items:center;justify-content:space-between}
   .updated-tag{font-size:10px;color:var(--muted);margin-top:1px}
+  /* debug banner */
+  #debug-bar{display:none;background:#1a1a00;border-bottom:1px solid #444400;padding:6px 16px;font-size:11px;font-family:monospace;color:#cccc00;word-break:break-all;white-space:pre-wrap;max-height:120px;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -105,6 +106,9 @@
     </div>
   </div>
 
+  <!-- Debug bar — visible solo si hay problema (toca 5 veces el título para activar) -->
+  <div id="debug-bar"></div>
+
   <div class="search-bar">
     <input type="search" id="search-input" placeholder="Buscar producto, marca, color..." oninput="renderList()" />
   </div>
@@ -126,6 +130,30 @@ let activeCat = ''
 let pinInput = ''
 let correctPin = ''
 let stockData = null
+let debugTaps = 0
+
+// ── Debug helper ─────────────────────────────────────────────────────────────
+function dbg(msg) {
+  console.log('[DELPA]', msg)
+  const bar = document.getElementById('debug-bar')
+  if (bar && bar.style.display !== 'none') {
+    bar.textContent += '\n' + msg
+    bar.scrollTop = bar.scrollHeight
+  }
+}
+
+// Tap title 5 times to show debug bar
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('.app-header h2')?.addEventListener('click', () => {
+    debugTaps++
+    if (debugTaps >= 5) {
+      const bar = document.getElementById('debug-bar')
+      bar.style.display = 'block'
+      bar.textContent = '[DEBUG MODE]\n' + (stockData ? JSON.stringify(stockData).slice(0, 800) : 'sin datos')
+      debugTaps = 0
+    }
+  })
+})
 
 // ── JSONP helper ──────────────────────────────────────────────────────────────
 function jsonpRequest() {
@@ -134,7 +162,7 @@ function jsonpRequest() {
     const script = document.createElement('script')
     const timer = setTimeout(() => {
       delete window[cb]; script.remove()
-      reject(new Error('Tiempo de espera agotado'))
+      reject(new Error('Tiempo de espera agotado (15s)'))
     }, 15000)
     window[cb] = function(data) {
       clearTimeout(timer); delete window[cb]; script.remove()
@@ -142,11 +170,75 @@ function jsonpRequest() {
     }
     script.onerror = function() {
       clearTimeout(timer); delete window[cb]; script.remove()
-      reject(new Error('Error de red'))
+      reject(new Error('Error de red al cargar el script'))
     }
-    script.src = SCRIPT_URL + '?action=getStock&callback=' + cb
+    script.src = SCRIPT_URL + '?action=getStock&callback=' + cb + '&_t=' + Date.now()
     document.head.appendChild(script)
+    dbg('JSONP request: ' + script.src)
   })
+}
+
+// ── Normalizar respuesta del Apps Script ─────────────────────────────────────
+// El Apps Script puede devolver distintas estructuras; esta función las unifica.
+function normalizeStockData(raw) {
+  if (!raw) return { products: [], updatedAt: null, pin: '' }
+
+  // Ya tiene el formato correcto
+  if (Array.isArray(raw.products)) {
+    dbg('Formato: { products: [...] } — ' + raw.products.length + ' productos')
+    return raw
+  }
+
+  // El Apps Script devuelve { data: [...] }
+  if (Array.isArray(raw.data)) {
+    dbg('Formato: { data: [...] } — ' + raw.data.length + ' productos')
+    return { products: raw.data, updatedAt: raw.updatedAt || null, pin: raw.pin || '' }
+  }
+
+  // El Apps Script devuelve { stock: [...] }
+  if (Array.isArray(raw.stock)) {
+    dbg('Formato: { stock: [...] } — ' + raw.stock.length + ' productos')
+    return { products: raw.stock, updatedAt: raw.updatedAt || null, pin: raw.pin || '' }
+  }
+
+  // El Apps Script devuelve el array directamente
+  if (Array.isArray(raw)) {
+    dbg('Formato: array directo — ' + raw.length + ' productos')
+    return { products: raw, updatedAt: null, pin: '' }
+  }
+
+  // Buscar cualquier clave que sea un array
+  for (const key of Object.keys(raw)) {
+    if (Array.isArray(raw[key]) && raw[key].length > 0) {
+      dbg('Formato: { ' + key + ': [...] } — ' + raw[key].length + ' elementos')
+      return { products: raw[key], updatedAt: raw.updatedAt || null, pin: raw.pin || '' }
+    }
+  }
+
+  dbg('ERROR: no se encontraron productos. Claves recibidas: ' + Object.keys(raw).join(', '))
+  dbg('Raw (primeros 300 chars): ' + JSON.stringify(raw).slice(0, 300))
+  return { products: [], updatedAt: null, pin: '' }
+}
+
+// ── Normalizar producto individual ────────────────────────────────────────────
+function normalizeProduct(p) {
+  // Soporta tanto el formato DELPA (color/price a nivel producto)
+  // como formatos alternativos que los ponen en sizes
+  const sizes = (p.sizes || p.talles || p.stock || []).map(s => ({
+    size:  s.size  || s.talle  || s.nombre || String(s),
+    stock: Number(s.stock || s.cantidad || s.qty || 0),
+  })).filter(s => s.size)
+
+  return {
+    id:       p.id || 0,
+    name:     p.name  || p.nombre  || p.producto || '',
+    brand:    p.brand || p.marca   || '',
+    category: p.category || p.categoria || p.rubro || '',
+    color:    p.color || p.colour  || '',
+    price:    Number(p.price || p.precio || 0),
+    image:    p.image || p.imagen  || p.image_data || null,
+    sizes,
+  }
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -181,7 +273,11 @@ function updateDots() {
 async function checkPin() {
   document.getElementById('pin-error').textContent = 'Verificando...'
   try {
-    stockData = await jsonpRequest()
+    const raw = await jsonpRequest()
+    dbg('Respuesta raw (checkPin): ' + JSON.stringify(raw).slice(0, 500))
+    stockData = normalizeStockData(raw)
+
+    // Si el Apps Script no devuelve PIN, saltear validación
     if (stockData.pin && stockData.pin !== pinInput) {
       document.getElementById('pin-error').textContent = 'PIN incorrecto'
       pinInput = ''; updateDots(); return
@@ -190,7 +286,8 @@ async function checkPin() {
     sessionStorage.setItem(LS_PIN_KEY, correctPin)
     showApp()
   } catch (e) {
-    document.getElementById('pin-error').textContent = 'Error al cargar: ' + e.message
+    dbg('ERROR checkPin: ' + e.message)
+    document.getElementById('pin-error').textContent = 'Error: ' + e.message
     pinInput = ''; updateDots()
   }
 }
@@ -208,19 +305,29 @@ function showApp() {
 
 async function fetchStock() {
   try {
-    stockData = await jsonpRequest()
+    const raw = await jsonpRequest()
+    dbg('Respuesta raw (fetchStock): ' + JSON.stringify(raw).slice(0, 500))
+    stockData = normalizeStockData(raw)
     loadStock(stockData)
   } catch (e) {
-    document.getElementById('loading-state').innerHTML = '<p style="color:var(--danger)">Error: ' + e.message + '</p>'
+    dbg('ERROR fetchStock: ' + e.message)
+    document.getElementById('loading-state').innerHTML =
+      '<p style="color:var(--danger)">Error al cargar: ' + e.message + '</p>'
   }
 }
 
 function loadStock(data) {
-  allProducts = data.products || []
+  const rawProducts = data.products || []
+  allProducts = rawProducts.map(normalizeProduct).filter(p => p.name && p.sizes.length > 0)
+
+  dbg('loadStock: ' + rawProducts.length + ' raw → ' + allProducts.length + ' con talles')
 
   if (data.updatedAt) {
-    const d = new Date(data.updatedAt)
-    document.getElementById('updated-label').textContent = 'Actualizado: ' + d.toLocaleString('es-AR', { hour12: false, timeZone: 'America/Argentina/Buenos_Aires' })
+    try {
+      const d = new Date(data.updatedAt)
+      document.getElementById('updated-label').textContent =
+        'Actualizado: ' + d.toLocaleString('es-AR', { hour12: false, timeZone: 'America/Argentina/Buenos_Aires' })
+    } catch {}
   }
 
   const cats = [...new Set(allProducts.map(p => p.category).filter(Boolean))]
@@ -229,13 +336,23 @@ function loadStock(data) {
   const allBtn = document.createElement('button')
   allBtn.className = 'cat-btn active'
   allBtn.textContent = 'Todos'
-  allBtn.onclick = () => { activeCat = ''; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); allBtn.classList.add('active'); renderList() }
+  allBtn.onclick = () => {
+    activeCat = ''
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'))
+    allBtn.classList.add('active')
+    renderList()
+  }
   cf.appendChild(allBtn)
   cats.forEach(cat => {
     const btn = document.createElement('button')
     btn.className = 'cat-btn'
     btn.textContent = cat
-    btn.onclick = () => { activeCat = cat; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderList() }
+    btn.onclick = () => {
+      activeCat = cat
+      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      renderList()
+    }
     cf.appendChild(btn)
   })
 
@@ -263,7 +380,11 @@ function renderList() {
 
   if (filtered.length === 0) {
     empty.style.display = 'block'
+    empty.textContent = allProducts.length === 0
+      ? 'No hay productos disponibles'
+      : 'Sin resultados para la búsqueda'
     loading.style.display = 'none'
+    dbg('renderList: 0 resultados (total=' + allProducts.length + ', filtro="' + q + '", cat="' + activeCat + '")')
     return
   }
   empty.style.display = 'none'
@@ -273,7 +394,7 @@ function renderList() {
     const card = document.createElement('div')
     card.className = 'product-card'
 
-    const totalStock = p.sizes.reduce((s, sz) => s + (sz.stock || 0), 0)
+    const totalStock = p.sizes.reduce((s, sz) => s + sz.stock, 0)
 
     const hdr = document.createElement('div')
     hdr.className = 'product-header'
@@ -283,15 +404,16 @@ function renderList() {
     if (p.image) { thumb.src = p.image; thumb.alt = p.name }
     else thumb.textContent = '📦'
 
+    const sub = [p.brand, p.color].filter(Boolean).join(' · ')
     const info = document.createElement('div')
     info.className = 'product-info'
     info.innerHTML = `<div class="product-name">${escHtml(p.name)}</div>
-      <div class="product-sub">${[p.brand, p.color].filter(Boolean).join(' · ') || '&nbsp;'}</div>
-      <div class="product-sub" style="margin-top:2px;color:var(--muted)">Stock total: ${totalStock}</div>`
+      <div class="product-sub">${sub ? escHtml(sub) : '&nbsp;'}</div>
+      <div class="product-sub" style="margin-top:2px">Stock: ${totalStock}</div>`
 
     const price = document.createElement('div')
     price.className = 'product-price'
-    price.textContent = '$' + Number(p.price).toLocaleString('es-AR')
+    price.textContent = p.price ? '$' + Number(p.price).toLocaleString('es-AR') : ''
 
     hdr.appendChild(thumb)
     hdr.appendChild(info)
@@ -303,9 +425,8 @@ function renderList() {
       row.className = 'sizes-row'
       p.sizes.forEach(sz => {
         const badge = document.createElement('span')
-        const stock = sz.stock || 0
-        badge.className = 'size-badge' + (stock === 0 ? ' out' : stock <= 2 ? ' low' : '')
-        badge.innerHTML = escHtml(sz.size) + `<span class="size-stock">(${stock})</span>`
+        badge.className = 'size-badge' + (sz.stock === 0 ? ' out' : sz.stock <= 2 ? ' low' : '')
+        badge.innerHTML = escHtml(sz.size) + `<span class="size-stock">(${sz.stock})</span>`
         row.appendChild(badge)
       })
       card.appendChild(row)
@@ -322,6 +443,7 @@ function escHtml(s) {
 function logout() {
   sessionStorage.removeItem(LS_PIN_KEY)
   stockData = null
+  allProducts = []
   location.reload()
 }
 </script>
