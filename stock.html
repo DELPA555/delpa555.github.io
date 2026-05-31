@@ -21,10 +21,6 @@
   .pad-btn:active{background:#222;transform:scale(0.95)}
   .pad-btn.delete{font-size:16px;color:var(--muted)}
   #pin-error{color:var(--danger);font-size:13px;min-height:18px;text-align:center}
-  #stored-url-section{display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px}
-  #stored-url-section label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-  #stock-url-input{background:var(--card);border:1px solid var(--border);color:var(--text);font-size:12px;padding:10px 12px;border-radius:10px;width:100%;font-family:monospace}
-  #save-url-btn{background:var(--accent);color:#000;font-size:13px;font-weight:600;padding:10px 0;border-radius:10px;border:none;cursor:pointer;width:100%}
 
   /* ── App screen ── */
   #app-screen{display:none;flex-direction:column;min-height:100dvh}
@@ -95,14 +91,6 @@
   </div>
 
   <p id="pin-error"></p>
-
-  <!-- URL config (shown only if not stored yet) -->
-  <div id="stored-url-section">
-    <label>URL del stock (Drive)</label>
-    <input id="stock-url-input" type="url" placeholder="https://drive.google.com/uc?export=download&id=..." />
-    <button id="save-url-btn" onclick="saveUrl()">Guardar URL</button>
-    <p style="font-size:11px;color:var(--muted);text-align:center">Esta URL la encontrás en Configuración → Pagos & Drive</p>
-  </div>
 </div>
 
 <!-- ── App screen ── -->
@@ -130,38 +118,45 @@
 </div>
 
 <script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZfzVmml8GljdWS4Pw7MuHiXJF9nJgLw0ipXfXqf6u1_kzQMGCvvaLgYCNB8xp848n/exec'
+const LS_PIN_KEY = 'delpa_stock_pin_session'
+
 let allProducts = []
 let activeCat = ''
 let pinInput = ''
 let correctPin = ''
 let stockData = null
 
-const LS_URL_KEY = 'delpa_stock_url'
-const LS_PIN_KEY = 'delpa_stock_pin_session'
+// ── JSONP helper ──────────────────────────────────────────────────────────────
+function jsonpRequest() {
+  return new Promise((resolve, reject) => {
+    const cb = '__delpaStockCb' + Date.now()
+    const script = document.createElement('script')
+    const timer = setTimeout(() => {
+      delete window[cb]; script.remove()
+      reject(new Error('Tiempo de espera agotado'))
+    }, 15000)
+    window[cb] = function(data) {
+      clearTimeout(timer); delete window[cb]; script.remove()
+      resolve(data)
+    }
+    script.onerror = function() {
+      clearTimeout(timer); delete window[cb]; script.remove()
+      reject(new Error('Error de red'))
+    }
+    script.src = SCRIPT_URL + '?action=getStock&callback=' + cb
+    document.head.appendChild(script)
+  })
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 ;(function init() {
-  const stored = localStorage.getItem(LS_URL_KEY)
-  if (stored) {
-    document.getElementById('stock-url-input').value = stored
-    document.getElementById('stored-url-section').style.display = 'flex'
-  }
-  // Check if we have a session pin
   const session = sessionStorage.getItem(LS_PIN_KEY)
   if (session) {
     correctPin = session
     showApp()
-    return
   }
 })()
-
-// ── URL persistence ──────────────────────────────────────────────────────────
-function saveUrl() {
-  const url = document.getElementById('stock-url-input').value.trim()
-  if (!url) return alert('Ingresá la URL')
-  localStorage.setItem(LS_URL_KEY, url)
-  alert('URL guardada')
-}
 
 // ── PIN pad ───────────────────────────────────────────────────────────────────
 function padPress(d) {
@@ -184,20 +179,9 @@ function updateDots() {
 }
 
 async function checkPin() {
-  // We need to load the JSON first to validate the PIN
-  const url = localStorage.getItem(LS_URL_KEY) || document.getElementById('stock-url-input').value.trim()
-  if (!url) {
-    document.getElementById('pin-error').textContent = 'Guardá la URL del stock primero'
-    pinInput = ''; updateDots(); return
-  }
-
+  document.getElementById('pin-error').textContent = 'Verificando...'
   try {
-    // Try fetching with a cache-busting param
-    const resp = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now(), {
-      headers: { 'Cache-Control': 'no-cache' }
-    })
-    if (!resp.ok) throw new Error('HTTP ' + resp.status)
-    stockData = await resp.json()
+    stockData = await jsonpRequest()
     if (stockData.pin && stockData.pin !== pinInput) {
       document.getElementById('pin-error').textContent = 'PIN incorrecto'
       pinInput = ''; updateDots(); return
@@ -223,12 +207,8 @@ function showApp() {
 }
 
 async function fetchStock() {
-  const url = localStorage.getItem(LS_URL_KEY) || ''
-  if (!url) { logout(); return }
   try {
-    const resp = await fetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now())
-    if (!resp.ok) throw new Error('HTTP ' + resp.status)
-    stockData = await resp.json()
+    stockData = await jsonpRequest()
     loadStock(stockData)
   } catch (e) {
     document.getElementById('loading-state').innerHTML = '<p style="color:var(--danger)">Error: ' + e.message + '</p>'
@@ -238,13 +218,11 @@ async function fetchStock() {
 function loadStock(data) {
   allProducts = data.products || []
 
-  // Updated label
   if (data.updatedAt) {
     const d = new Date(data.updatedAt)
     document.getElementById('updated-label').textContent = 'Actualizado: ' + d.toLocaleString('es-AR', { hour12: false, timeZone: 'America/Argentina/Buenos_Aires' })
   }
 
-  // Build categories
   const cats = [...new Set(allProducts.map(p => p.category).filter(Boolean))]
   const cf = document.getElementById('category-filter')
   cf.innerHTML = ''
@@ -281,7 +259,6 @@ function renderList() {
   const empty = document.getElementById('empty-state')
   const loading = document.getElementById('loading-state')
 
-  // Remove existing cards
   list.querySelectorAll('.product-card').forEach(el => el.remove())
 
   if (filtered.length === 0) {
@@ -298,7 +275,6 @@ function renderList() {
 
     const totalStock = p.sizes.reduce((s, sz) => s + (sz.stock || 0), 0)
 
-    // Header
     const hdr = document.createElement('div')
     hdr.className = 'product-header'
 
@@ -322,7 +298,6 @@ function renderList() {
     hdr.appendChild(price)
     card.appendChild(hdr)
 
-    // Sizes
     if (p.sizes.length > 0) {
       const row = document.createElement('div')
       row.className = 'sizes-row'
@@ -346,6 +321,7 @@ function escHtml(s) {
 
 function logout() {
   sessionStorage.removeItem(LS_PIN_KEY)
+  stockData = null
   location.reload()
 }
 </script>
