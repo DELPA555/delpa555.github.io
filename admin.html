@@ -9,128 +9,156 @@
 body { font-family: Arial, sans-serif; background: #0d0d0d; color: #fff; min-height: 100vh; }
 header { background: #0d0d0d; border-bottom: 2px solid #e91e8c; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
 header h1 { font-size: 22px; color: #fff; }
-header span { color: #e91e8c; font-size: 13px; }
+header .version { color: #555; font-size: 12px; }
 .login { display: flex; align-items: center; justify-content: center; min-height: 80vh; }
-.login-box { background: #1a1a1a; border: 1px solid #333; border-radius: 16px; padding: 40px; width: 360px; text-align: center; }
-.login-box h2 { color: #e91e8c; margin-bottom: 24px; }
+.login-box { background: #1a1a1a; border: 2px solid #e91e8c; border-radius: 16px; padding: 40px; width: 360px; text-align: center; }
+.login-box h2 { color: #e91e8c; margin-bottom: 8px; }
+.login-box p { color: #888; font-size: 13px; margin-bottom: 24px; }
 .login-box input { width: 100%; padding: 12px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; margin-bottom: 16px; outline: none; }
 .login-box input:focus { border-color: #e91e8c; }
-.btn { background: #e91e8c; color: #fff; border: none; padding: 12px 32px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; }
+.btn { background: #e91e8c; color: #fff; border: none; padding: 12px 32px; border-radius: 8px; font-size: 15px; cursor: pointer; }
 .btn:hover { background: #c2186e; }
-.panel { padding: 32px; }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
-.stat { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; text-align: center; }
-.stat .num { font-size: 36px; font-weight: bold; color: #e91e8c; }
-.stat .label { color: #888; font-size: 13px; margin-top: 4px; }
+.btn:disabled { background: #555; cursor: not-allowed; }
+.panel { padding: 24px 32px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat { background: #1a1a1a; border: 1px solid #222; border-radius: 12px; padding: 18px; text-align: center; }
+.stat .num { font-size: 32px; font-weight: bold; color: #e91e8c; }
+.stat .label { color: #888; font-size: 12px; margin-top: 4px; }
 .stat.verde .num { color: #00c853; }
 .stat.rojo .num { color: #c62828; }
 .stat.amarillo .num { color: #f9a825; }
-table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
-th { background: #0d0d0d; color: #e91e8c; padding: 12px 16px; text-align: left; font-size: 13px; }
-td { padding: 10px 16px; border-bottom: 1px solid #222; font-size: 13px; vertical-align: middle; }
+.stat.azul .num { color: #1e88e5; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: gap; gap: 12px; }
+.toolbar h2 { font-size: 17px; }
+.toolbar-right { display: flex; gap: 8px; align-items: center; }
+.search-box { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 8px 14px; color: #fff; font-size: 13px; outline: none; width: 200px; }
+.search-box:focus { border-color: #e91e8c; }
+.btn-sm { background: transparent; border: 1px solid #e91e8c; color: #e91e8c; padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 12px; }
+.btn-sm:hover { background: #e91e8c; color: #fff; }
+.btn-sm.green { border-color: #00c853; color: #00c853; }
+.btn-sm.green:hover { background: #00c853; color: #000; }
+table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 12px; overflow: hidden; font-size: 13px; }
+th { background: #111; color: #e91e8c; padding: 11px 14px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 10px 14px; border-bottom: 1px solid #1f1f1f; vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: #222; }
-.badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+tr:hover td { background: #1f1f1f; }
+.badge { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: bold; }
 .badge.ok { background: #1b5e20; color: #a5d6a7; }
 .badge.warn { background: #e65100; color: #ffe0b2; }
 .badge.danger { background: #b71c1c; color: #ffcdd2; }
-.btn-activar { background: #e91e8c; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+.badge.trial { background: #1565c0; color: #bbdefb; }
+.btn-activar { background: #e91e8c; color: #fff; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; }
 .btn-activar:hover { background: #c2186e; }
-.btn-activar:disabled { background: #555; cursor: not-allowed; }
-.refresh { float: right; background: transparent; border: 1px solid #e91e8c; color: #e91e8c; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-.refresh:hover { background: #e91e8c; color: #fff; }
 .loading { text-align: center; color: #888; padding: 40px; }
 .error-msg { color: #e91e8c; text-align: center; padding: 20px; }
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+.last-update { color: #555; font-size: 12px; margin-top: 12px; text-align: right; }
+/* Modal */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
-.modal { background: #1a1a1a; border: 2px solid #e91e8c; border-radius: 16px; padding: 32px; width: 400px; text-align: center; }
-.modal h3 { color: #e91e8c; margin-bottom: 16px; font-size: 18px; }
-.modal p { color: #aaa; margin-bottom: 16px; font-size: 14px; }
-.modal select { width: 100%; padding: 10px; background: #0d0d0d; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 16px; margin-bottom: 16px; }
-.modal .code-box { background: #0d0d0d; border: 1px solid #e91e8c; border-radius: 8px; padding: 16px; font-size: 24px; font-weight: bold; color: #e91e8c; letter-spacing: 4px; margin: 16px 0; cursor: pointer; }
-.modal .code-box:hover { background: #1a0a12; }
-.modal-btns { display: flex; gap: 12px; justify-content: center; }
-.btn-secondary { background: transparent; border: 1px solid #555; color: #aaa; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.modal { background: #1a1a1a; border: 2px solid #e91e8c; border-radius: 16px; padding: 32px; width: 420px; text-align: center; }
+.modal h3 { color: #e91e8c; margin-bottom: 8px; font-size: 18px; }
+.modal .subtitle { color: #888; font-size: 13px; margin-bottom: 20px; font-family: monospace; }
+.modal select { width: 100%; padding: 10px; background: #0d0d0d; border: 1px solid #444; border-radius: 8px; color: #fff; font-size: 15px; margin-bottom: 16px; }
+.code-box { background: #0d0d0d; border: 2px solid #e91e8c; border-radius: 10px; padding: 18px; font-size: 22px; font-weight: bold; color: #e91e8c; letter-spacing: 5px; margin: 16px 0; cursor: pointer; transition: background 0.2s; }
+.code-box:hover { background: #1a0812; }
+.code-expires { color: #888; font-size: 12px; margin-bottom: 8px; }
+.copied-msg { color: #00c853; font-size: 13px; height: 20px; margin-bottom: 8px; }
+.modal-btns { display: flex; gap: 10px; justify-content: center; margin-top: 8px; }
+.btn-secondary { background: transparent; border: 1px solid #444; color: #aaa; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; }
 .btn-secondary:hover { border-color: #e91e8c; color: #e91e8c; }
-.copied { color: #00c853; font-size: 13px; margin-top: 8px; }
+.hw-id { font-size: 10px; color: #444; font-family: monospace; margin-top: 2px; }
+.dias-badge { font-weight: bold; }
+.dias-ok { color: #00c853; }
+.dias-warn { color: #f9a825; }
+.dias-danger { color: #e91e8c; }
 </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>DELPA Gestión PRO</h1>
-    <span>Panel de Administración</span>
+    <h1>⚡ DELPA Gestión PRO</h1>
+    <div class="version">Panel de Administración · Iván Emmanuel Del Palacio</div>
   </div>
-  <span style="color:#888;font-size:13px;">Iván Emmanuel Del Palacio</span>
+  <div style="text-align:right;">
+    <div style="color:#e91e8c;font-size:13px;font-weight:bold;" id="header-stats">—</div>
+    <div style="color:#555;font-size:11px;" id="header-time">—</div>
+  </div>
 </header>
 
-<!-- Modal de activación -->
+<!-- Modal activación -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h3 id="modal-title">Activar licencia</h3>
-    <p id="modal-subtitle">Seleccioná la cantidad de meses</p>
-    <div id="modal-content-select">
+    <div class="subtitle" id="modal-subtitle">—</div>
+    <div id="modal-select">
       <select id="months-select">
         <option value="1">1 mes</option>
         <option value="3">3 meses</option>
         <option value="6">6 meses</option>
-        <option value="12">12 meses</option>
+        <option value="12">12 meses — Anual</option>
       </select>
       <div class="modal-btns">
         <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
-        <button class="btn" onclick="generateCode()" id="btn-generate">Generar código</button>
+        <button class="btn" onclick="generateCode()" id="btn-gen">Generar código</button>
       </div>
     </div>
-    <div id="modal-content-code" style="display:none;">
-      <p>Código de activación:</p>
-      <div class="code-box" id="code-display" onclick="copyCode()" title="Click para copiar">-</div>
-      <p style="font-size:12px;color:#888;">Vence: <span id="code-expires">-</span></p>
-      <p class="copied" id="copied-msg" style="display:none;">✓ Copiado al portapapeles</p>
-      <div class="modal-btns" style="margin-top:16px;">
+    <div id="modal-code" style="display:none;">
+      <div style="color:#aaa;font-size:13px;margin-bottom:8px;">Código de activación — click para copiar:</div>
+      <div class="code-box" id="code-display" onclick="copyCode()">—</div>
+      <div class="code-expires" id="code-expires">—</div>
+      <div class="copied-msg" id="copied-msg"></div>
+      <div class="modal-btns">
         <button class="btn-secondary" onclick="closeModal()">Cerrar</button>
-        <button class="btn" onclick="copyCode()">Copiar código</button>
+        <button class="btn" onclick="copyCode()">📋 Copiar código</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Login -->
 <div id="login-screen" class="login">
   <div class="login-box">
-    <h2>Acceso al Panel</h2>
-    <input type="password" id="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')login()">
-    <button class="btn" onclick="login()">Ingresar</button>
+    <h2>🔐 DELPA Admin</h2>
+    <p>Panel exclusivo del distribuidor</p>
+    <input type="password" id="password" placeholder="Contraseña de acceso" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn" style="width:100%;" onclick="login()">Ingresar</button>
     <p id="login-error" style="color:#e91e8c;margin-top:12px;font-size:13px;"></p>
   </div>
 </div>
 
+<!-- Panel principal -->
 <div id="panel-screen" class="panel" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-    <h2 style="font-size:18px;">Clientes DELPA</h2>
-    <button class="refresh" onclick="loadData()">↻ Actualizar</button>
-  </div>
-  
-  <div class="stats">
-    <div class="stat verde"><div class="num" id="stat-total">-</div><div class="label">Total clientes</div></div>
-    <div class="stat verde"><div class="num" id="stat-activos">-</div><div class="label">Activos</div></div>
-    <div class="stat amarillo"><div class="num" id="stat-porvencer">-</div><div class="label">Por vencer</div></div>
-    <div class="stat rojo"><div class="num" id="stat-vencidos">-</div><div class="label">Vencidos</div></div>
+
+  <div class="stats" id="stats-grid">
+    <div class="stat azul"><div class="num" id="s-total">—</div><div class="label">Total clientes</div></div>
+    <div class="stat verde"><div class="num" id="s-activos">—</div><div class="label">Activos</div></div>
+    <div class="stat amarillo"><div class="num" id="s-porvencer">—</div><div class="label">Por vencer (7d)</div></div>
+    <div class="stat rojo"><div class="num" id="s-vencidos">—</div><div class="label">Vencidos</div></div>
   </div>
 
-  <div id="table-container">
-    <div class="loading">Cargando datos...</div>
+  <div class="toolbar">
+    <h2>Clientes DELPA</h2>
+    <div class="toolbar-right">
+      <input class="search-box" type="text" id="search-input" placeholder="🔍 Buscar negocio..." oninput="filterTable()">
+      <button class="btn-sm green" onclick="loadData()">↻ Actualizar</button>
+    </div>
   </div>
+
+  <div id="table-container"><div class="loading">Cargando datos...</div></div>
+  <div class="last-update" id="last-update"></div>
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxZfzVmml8GljdWS4Pw7MuHiXJF9nJgLw0ipXfXqf6u1_kzQMGCvvaLgYCNB8xp848n/exec';
-let password = '';
-let currentHardwareId = '';
+const API = 'https://script.google.com/macros/s/AKfycbxZfzVmml8GljdWS4Pw7MuHiXJF9nJgLw0ipXfXqf6u1_kzQMGCvvaLgYCNB8xp848n/exec';
+let pass = '';
+let currentHwId = '';
+let allClients = [];
 
 function login() {
-  const pass = document.getElementById('password').value;
-  if (pass === 'delpa2026') {
-    password = pass;
+  const p = document.getElementById('password').value;
+  if (p === 'delpa2026') {
+    pass = p;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('panel-screen').style.display = 'block';
     loadData();
@@ -142,90 +170,102 @@ function login() {
 async function loadData() {
   document.getElementById('table-container').innerHTML = '<div class="loading">Cargando datos...</div>';
   try {
-    const res = await fetch(API_URL + '?pass=' + password);
+    const res = await fetch(API + '?pass=' + pass + '&t=' + Date.now());
     const data = await res.json();
     if (data.error) { document.getElementById('table-container').innerHTML = '<div class="error-msg">' + data.error + '</div>'; return; }
-    document.getElementById('stat-total').textContent = data.total || 0;
-    document.getElementById('stat-activos').textContent = data.activos || 0;
-    document.getElementById('stat-porvencer').textContent = data.porVencer || 0;
-    document.getElementById('stat-vencidos').textContent = data.vencidos || 0;
-    if (!data.clients || data.clients.length === 0) {
-      document.getElementById('table-container').innerHTML = '<div class="loading">No hay clientes registrados todavía.</div>';
-      return;
-    }
-    let html = '<table><thead><tr><th>Negocio</th><th>Estado</th><th>Días</th><th>Versión</th><th>Última conexión</th><th>Última venta</th><th>Activar</th></tr></thead><tbody>';
-    data.clients.forEach(c => {
-      const badge = c.alert === 'vencido' ? '<span class="badge danger">VENCIDO</span>' :
-                    c.alert === 'vence_pronto' ? '<span class="badge warn">VENCE PRONTO</span>' :
-                    '<span class="badge ok">ACTIVO</span>';
-      html += `<tr>
-        <td><b>${c.businessName}</b><br><span style="color:#555;font-size:11px;">${c.hardwareId}</span></td>
-        <td>${badge}</td>
-        <td>${c.daysLeft > 0 ? c.daysLeft + ' días' : '<span style="color:#e91e8c">Vencido</span>'}</td>
-        <td>v${c.version}</td>
-        <td>${c.lastSeen}</td>
-        <td>${c.lastSale || '-'}</td>
-        <td><button class="btn-activar" onclick="openModal('${c.hardwareId}', '${c.businessName}')">Activar</button></td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
-    document.getElementById('table-container').innerHTML = html;
+    
+    allClients = data.clients || [];
+    document.getElementById('s-total').textContent = data.total || 0;
+    document.getElementById('s-activos').textContent = data.activos || 0;
+    document.getElementById('s-porvencer').textContent = data.porVencer || 0;
+    document.getElementById('s-vencidos').textContent = data.vencidos || 0;
+    document.getElementById('header-stats').textContent = data.activos + ' activos · ' + data.vencidos + ' vencidos';
+    document.getElementById('header-time').textContent = 'Actualizado: ' + new Date().toLocaleString('es-AR');
+    document.getElementById('last-update').textContent = 'Última actualización: ' + new Date().toLocaleString('es-AR');
+    
+    renderTable(allClients);
   } catch(err) {
-    document.getElementById('table-container').innerHTML = '<div class="error-msg">Error: ' + err.message + '</div>';
+    document.getElementById('table-container').innerHTML = '<div class="error-msg">Error de conexión: ' + err.message + '</div>';
   }
 }
 
-function openModal(hardwareId, businessName) {
-  currentHardwareId = hardwareId;
-  document.getElementById('modal-title').textContent = 'Activar: ' + businessName;
-  document.getElementById('modal-subtitle').textContent = 'Hardware ID: ' + hardwareId;
-  document.getElementById('modal-content-select').style.display = 'block';
-  document.getElementById('modal-content-code').style.display = 'none';
+function renderTable(clients) {
+  if (!clients || clients.length === 0) {
+    document.getElementById('table-container').innerHTML = '<div class="loading">No hay clientes registrados todavía.</div>';
+    return;
+  }
+  let html = '<table><thead><tr><th>Negocio</th><th>Estado</th><th>Días restantes</th><th>Versión</th><th>Última conexión</th><th>Última venta</th><th>Acción</th></tr></thead><tbody>';
+  clients.forEach(c => {
+    const badge = c.alert === 'vencido' ? '<span class="badge danger">VENCIDO</span>' :
+                  c.alert === 'vence_pronto' ? '<span class="badge warn">VENCE PRONTO</span>' :
+                  c.licenseStatus === 'trial' ? '<span class="badge trial">TRIAL</span>' :
+                  '<span class="badge ok">ACTIVO</span>';
+    const diasClass = c.daysLeft <= 0 ? 'dias-danger' : c.daysLeft <= 7 ? 'dias-warn' : 'dias-ok';
+    const diasText = c.daysLeft > 0 ? c.daysLeft + ' días' : 'Vencido';
+    html += `<tr>
+      <td><b>${c.businessName}</b><div class="hw-id">${c.hardwareId}</div></td>
+      <td>${badge}</td>
+      <td><span class="dias-badge ${diasClass}">${diasText}</span></td>
+      <td>v${c.version || '—'}</td>
+      <td>${c.lastSeen || '—'}</td>
+      <td>${c.lastSale || '—'}</td>
+      <td><button class="btn-activar" onclick="openModal('${c.hardwareId}','${c.businessName.replace(/'/g,"\\'")}')">⚡ Activar</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('table-container').innerHTML = html;
+}
+
+function filterTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = allClients.filter(c => c.businessName.toLowerCase().includes(q) || c.hardwareId.toLowerCase().includes(q));
+  renderTable(filtered);
+}
+
+function openModal(hwId, name) {
+  currentHwId = hwId;
+  document.getElementById('modal-title').textContent = '⚡ Activar licencia';
+  document.getElementById('modal-subtitle').textContent = name + '\n' + hwId;
+  document.getElementById('modal-select').style.display = 'block';
+  document.getElementById('modal-code').style.display = 'none';
   document.getElementById('modal').classList.add('show');
 }
 
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
-  currentHardwareId = '';
+  currentHwId = '';
 }
 
 async function generateCode() {
   const months = document.getElementById('months-select').value;
-  const btn = document.getElementById('btn-generate');
-  btn.disabled = true;
-  btn.textContent = 'Generando...';
+  const btn = document.getElementById('btn-gen');
+  btn.disabled = true; btn.textContent = 'Generando...';
   try {
-    const url = `${API_URL}?pass=${password}&action=generateLicense&hardwareId=${currentHardwareId}&months=${months}`;
+    const url = API + '?pass=' + pass + '&action=generateLicense&hardwareId=' + currentHwId + '&months=' + months;
     const res = await fetch(url);
     const data = await res.json();
     if (data.ok) {
       document.getElementById('code-display').textContent = data.code;
-      document.getElementById('code-expires').textContent = data.expires + ' (' + data.months + ' mes' + (data.months > 1 ? 'es' : '') + ')';
-      document.getElementById('modal-content-select').style.display = 'none';
-      document.getElementById('modal-content-code').style.display = 'block';
+      document.getElementById('code-expires').textContent = 'Vence el ' + data.expires + ' (' + data.months + (data.months == 1 ? ' mes' : ' meses') + ')';
+      document.getElementById('modal-select').style.display = 'none';
+      document.getElementById('modal-code').style.display = 'block';
     } else {
-      alert('Error: ' + (data.error || 'No se pudo generar el código'));
+      alert('Error: ' + (data.error || 'No se pudo generar'));
     }
-  } catch(err) {
-    alert('Error de conexión: ' + err.message);
-  }
-  btn.disabled = false;
-  btn.textContent = 'Generar código';
+  } catch(err) { alert('Error: ' + err.message); }
+  btn.disabled = false; btn.textContent = 'Generar código';
 }
 
 function copyCode() {
   const code = document.getElementById('code-display').textContent;
   navigator.clipboard.writeText(code).then(() => {
-    document.getElementById('copied-msg').style.display = 'block';
-    setTimeout(() => { document.getElementById('copied-msg').style.display = 'none'; }, 3000);
+    document.getElementById('copied-msg').textContent = '✓ Copiado al portapapeles';
+    setTimeout(() => document.getElementById('copied-msg').textContent = '', 3000);
   });
 }
 
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-setInterval(() => { if (password) loadData(); }, 300000);
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+setInterval(() => { if (pass) loadData(); }, 300000);
 </script>
 </body>
 </html>
